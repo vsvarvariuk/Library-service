@@ -18,7 +18,6 @@ class Book(models.Model):
         return f"{self.title}, daily free - {self.daily_free} USD"
 
 
-
 class Borrowing(models.Model):
     borrow_date = models.DateField(auto_now_add=True)
     expected_return_date = models.DateField()

@@ -1,16 +1,15 @@
 from datetime import datetime
-
-from django.utils import timezone
+from django.db.models import Q
 from rest_framework import viewsets, generics
-
 from rest_framework.exceptions import ValidationError, PermissionDenied
-
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
-
 from library.models import Book, Borrowing
-from library.serializers import BookSerializer, BorrowingSerializer, BorrowingListDetailSerializer, \
-    BorrowingReturnSerializer
+from library.serializers import (
+    BookSerializer,
+    BorrowingSerializer,
+    BorrowingListDetailSerializer,
+    BorrowingReturnSerializer,
+)
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -24,9 +23,27 @@ class BorrowingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        queryset = Borrowing.objects.all()
         if self.request.user.is_staff:
-            return Borrowing.objects.all()
-        return Borrowing.objects.filter(user=self.request.user)
+            full_name = self.request.query_params.get("user")
+            is_active = self.request.query_params.get("is_active")
+            if full_name:
+                queryset = queryset.filter(
+                    Q(user__first_name__icontains=full_name)
+                    | Q(user__last_name__icontains=full_name)
+                )
+            if is_active and is_active == "true":
+                queryset = queryset.filter(actual_return_date__isnull=True)
+            if is_active and is_active == "false":
+                queryset = queryset.filter(
+                    actual_return_date__isnull=False
+                ).select_related("book", "user")
+        else:
+            queryset = queryset.filter(user=self.request.user).select_related(
+                "book", "user"
+            )
+
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -49,7 +66,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-
 class BorrowingReturnView(generics.UpdateAPIView):
     serializer_class = BorrowingReturnSerializer
     permission_classes = (IsAdminUser,)
@@ -68,4 +84,3 @@ class BorrowingReturnView(generics.UpdateAPIView):
         borrowing.book.save()
 
         serializer.save(actual_return_date=borrowing.actual_return_date)
-
