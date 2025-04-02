@@ -26,5 +26,9 @@ class Borrowing(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    @property
+    def full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+
     def __str__(self):
-        return f"Borrowing {self.book.title} by {self.user.username}"
+        return f"Borrowing {self.book.title} by {self.full_name}"
