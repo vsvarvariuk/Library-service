@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "user",
     "library",
+    "payment",
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,9 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
 }
+
+STRIPE_SECRET_KEY = "sk_test_51R9QriC1MC3IWDLireo1nOMmeliI76AZuMlTHPuzvh2eiRJQw4NM09RaSoY2pIRJ0iPwsBDBSZ7TKKdhXZ56YlS300PfWTlcRt"
+
+STRIPE_PUBLISH_KEY = "pk_test_51R9QriC1MC3IWDLiiZpvdEf591b1bkRVeNQIyPZ0PfwNx4RhrAzabNChueb6Mb3pVdVY3JjKGR6xXprutAEMom7W00yMHedz06"
+
+DOMAIN = "http://localhost:8000"

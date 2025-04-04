@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework import viewsets, generics
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 from library.models import Book, Borrowing
 from library.serializers import (
     BookSerializer,
@@ -10,6 +11,7 @@ from library.serializers import (
     BorrowingListDetailSerializer,
     BorrowingReturnSerializer,
 )
+from payment.stripe import create_stripe_session
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -35,22 +37,27 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             if is_active and is_active == "true":
                 queryset = queryset.filter(actual_return_date__isnull=True)
             if is_active and is_active == "false":
-                queryset = queryset.filter(
-                    actual_return_date__isnull=False
-                ).select_related("book", "user")
+                queryset = (
+                    queryset.filter(actual_return_date__isnull=False)
+                    .select_related("book", "user")
+                    .prefetch_related("payments")
+                )
         else:
-            queryset = queryset.filter(user=self.request.user).select_related(
-                "book", "user"
+            queryset = (
+                queryset.filter(user=self.request.user)
+                .select_related("book", "user")
+                .prefetch_related("payments")
             )
 
         return queryset
 
     def get_serializer_class(self):
-        if self.request.method == "POST":
+        if self.action == "create":
             return BorrowingSerializer
         return BorrowingListDetailSerializer
 
     def perform_create(self, serializer):
+        borrowing = serializer.save(user=self.request.user)
         book = serializer.validated_data["book"]
         if book.inventory <= 0:
             raise ValidationError("This book is no longer available for rental.")
@@ -58,7 +65,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         book.inventory -= 1
         book.save()
 
-        serializer.save(user=self.request.user)
+        payment = create_stripe_session(borrowing)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.is_staff:

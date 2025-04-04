@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/library/", include("library.urls", namespace="library")),
     path("api/user/", include("user.urls", namespace="user")),
+    path("api/library/", include("payment.urls", namespace="payments")),
 ]
 
 if settings.DEBUG:
