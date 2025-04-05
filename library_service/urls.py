@@ -18,8 +18,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from library_service import settings
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/library/", include("library.urls", namespace="library")),
     path("api/user/", include("user.urls", namespace="user")),
+    path("api/library/", include("payment.urls", namespace="payments")),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
