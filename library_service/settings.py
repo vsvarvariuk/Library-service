@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",
     "user",
     "library",
     "payment",
@@ -139,6 +140,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "library.permissions.IsAdminOrIsAuthenticatedReadOnly",
     ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],

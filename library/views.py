@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, generics
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -50,6 +51,23 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "full_name",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter by user full_name",
+            ),
+            OpenApiParameter(
+                "is_active",
+                type={"type": "list", "items": {"type": "number"}},
+                description="Filter by borrowings is active",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == "create":

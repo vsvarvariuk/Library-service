@@ -23,7 +23,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
         )
 
 
-class BorrowingDetailSerializer(serializers.ModelSerializer):
+class BorrowingListDetailSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source="full_name")
     book = serializers.CharField(source="book.title")
     payments = PaymentSerializer()
