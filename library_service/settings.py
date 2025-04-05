@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,13 +38,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "debug_toolbar",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",
     "user",
     "library",
+    "payment",
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -69,6 +74,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
 ]
 
 WSGI_APPLICATION = "library_service.wsgi.application"
@@ -131,7 +140,22 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "library.permissions.IsAdminOrIsAuthenticatedReadOnly",
     ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
 }
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+}
+
+STRIPE_SECRET_KEY = "sk_test_51R9QriC1MC3IWDLireo1nOMmeliI76AZuMlTHPuzvh2eiRJQw4NM09RaSoY2pIRJ0iPwsBDBSZ7TKKdhXZ56YlS300PfWTlcRt"
+
+STRIPE_PUBLISH_KEY = "pk_test_51R9QriC1MC3IWDLiiZpvdEf591b1bkRVeNQIyPZ0PfwNx4RhrAzabNChueb6Mb3pVdVY3JjKGR6xXprutAEMom7W00yMHedz06"
+
+DOMAIN = "http://localhost:8000"
