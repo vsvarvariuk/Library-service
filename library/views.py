@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db.models import Q
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, generics
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -83,7 +84,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         book.inventory -= 1
         book.save()
 
-        payment = create_stripe_session(borrowing)
+        create_stripe_session(borrowing)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.is_staff:
@@ -103,9 +104,11 @@ class BorrowingReturnView(generics.UpdateAPIView):
             raise ValidationError("This book has already been returned.")
 
         borrowing.book.inventory += 1
-        datetime_value = datetime.now()
-        date_value = datetime_value.date()
-        borrowing.actual_return_date = date_value
+        return_date = timezone.now().date()
+        borrowing.actual_return_date = return_date
         borrowing.book.save()
 
-        serializer.save(actual_return_date=borrowing.actual_return_date)
+        serializer.save(actual_return_date=return_date)
+
+        if borrowing.actual_return_date > borrowing.expected_return_date:
+            create_stripe_session(borrowing)
