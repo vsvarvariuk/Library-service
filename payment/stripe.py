@@ -9,10 +9,21 @@ YOUR_DOMAIN = settings.DOMAIN
 
 
 def create_stripe_session(borrowing: Borrowing):
+    payment_price = (
+            (borrowing.expected_return_date - borrowing.borrow_date).days
+            * borrowing.book.daily_free
+    )
 
-    total_price = (
-        borrowing.expected_return_date - borrowing.borrow_date
-    ).days * borrowing.book.daily_free
+    if borrowing.actual_return_date and borrowing.actual_return_date > borrowing.expected_return_date:
+        total_price = (
+                (borrowing.actual_return_date - borrowing.expected_return_date).days
+                * borrowing.book.daily_free
+        )
+        payment_type = Payment.Type.FINE
+    else:
+        total_price = payment_price
+        payment_type = Payment.Type.PAYMENT
+
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=[
@@ -28,8 +39,7 @@ def create_stripe_session(borrowing: Borrowing):
             },
         ],
         mode="payment",
-        success_url=YOUR_DOMAIN
-        + "/api/library/success/?session_id={CHECKOUT_SESSION_ID}",
+        success_url=YOUR_DOMAIN + "/api/library/success/?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=YOUR_DOMAIN + "/api/library/cancel/",
     )
 
@@ -39,7 +49,7 @@ def create_stripe_session(borrowing: Borrowing):
         session_id=session.id,
         money_to_pay=total_price,
         status=Payment.Status.PENDING,
-        type=Payment.Type.PAYMENT,
+        type=payment_type,
     )
 
     return payment
