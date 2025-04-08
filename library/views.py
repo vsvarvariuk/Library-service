@@ -1,4 +1,4 @@
-from datetime import datetime
+from telegram import send_telegram_message
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -15,6 +15,16 @@ from library.serializers import (
 )
 from payment.stripe import create_stripe_session
 
+
+def send_borrowing_created_notification(borrowing):
+    message = (
+        f"*New Borrowing Created!*\n\n"
+        f"User: {borrowing.user.email}\n"
+        f"Book: {borrowing.book.title}\n"
+        f"From: {borrowing.borrow_date}\n"
+        f"To: {borrowing.expected_return_date}"
+    )
+    send_telegram_message(message)
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
@@ -85,6 +95,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         book.save()
 
         create_stripe_session(borrowing)
+        send_borrowing_created_notification(borrowing)
 
     def destroy(self, request, *args, **kwargs):
         if not request.user.is_staff:
