@@ -1,4 +1,4 @@
-from telegram import send_telegram_message
+from telegram.helper import send_telegram_message
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -19,10 +19,11 @@ from payment.stripe import create_stripe_session
 def send_borrowing_created_notification(borrowing):
     message = (
         f"*New Borrowing Created!*\n\n"
-        f"User: {borrowing.user.email}\n"
+        f"User: {borrowing.full_name}\n"
         f"Book: {borrowing.book.title}\n"
         f"From: {borrowing.borrow_date}\n"
         f"To: {borrowing.expected_return_date}"
+
     )
     send_telegram_message(message)
 

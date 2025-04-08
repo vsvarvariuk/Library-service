@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "debug_toolbar",
+    "telegram",
+    "django_q",
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
@@ -159,3 +161,14 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLISH_KEY = os.getenv("STRIPE_PUBLISH_KEY")
 
 DOMAIN = "http://localhost:8000"
+
+Q_CLUSTER = {
+    "name": "LibraryQ",
+    "workers": 4,
+    "recycle": 500,
+    "timeout": 60,
+    "retry": 120,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",
+}
