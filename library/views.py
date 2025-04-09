@@ -14,18 +14,8 @@ from library.serializers import (
     BorrowingReturnSerializer,
 )
 from payment.stripe import create_stripe_session
+from telegram.views import send_borrowing_created_notification
 
-
-def send_borrowing_created_notification(borrowing):
-    message = (
-        f"*New Borrowing Created!*\n\n"
-        f"User: {borrowing.full_name}\n"
-        f"Book: {borrowing.book.title}\n"
-        f"From: {borrowing.borrow_date}\n"
-        f"To: {borrowing.expected_return_date}"
-
-    )
-    send_telegram_message(message)
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
