@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "debug_toolbar",
     "telegram",
     "django_q",
     "rest_framework",
@@ -53,7 +52,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -88,13 +86,14 @@ INTERNAL_IPS = [
 WSGI_APPLICATION = "library_service.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": 5432,
     }
 }
 
@@ -163,7 +162,7 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 
 STRIPE_PUBLISH_KEY = os.getenv("STRIPE_PUBLISH_KEY")
 
-DOMAIN = "http://localhost:8000"
+DOMAIN = os.getenv("DOMAIN")
 
 Q_CLUSTER = {
     "name": "LibraryQ",

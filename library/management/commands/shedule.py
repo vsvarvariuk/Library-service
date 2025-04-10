@@ -7,8 +7,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         schedule, created = Schedule.objects.get_or_create(
             func="telegram.views.check_overdue_borrowings",
-            schedule_type=Schedule.MINUTES,
-            minutes=1,
+            schedule_type=Schedule.HOURLY,
             name="Check Overdue Borrowings Every Minute"
         )
         if created:

@@ -24,8 +24,8 @@ class Payment(models.Model):
     borrowing = models.OneToOneField(
         Borrowing, on_delete=models.CASCADE, related_name="payments"
     )
-    session_url = models.URLField()
-    session_id = models.CharField(max_length=255)
+    session_url = models.URLField(max_length=1024)
+    session_id = models.CharField(max_length=512)
     money_to_pay = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
