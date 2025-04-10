@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django_q.models import Schedule
 
+
 class Command(BaseCommand):
     help = "Create schedule for checking overdue borrowings"
 
@@ -8,7 +9,7 @@ class Command(BaseCommand):
         schedule, created = Schedule.objects.get_or_create(
             func="telegram.views.check_overdue_borrowings",
             schedule_type=Schedule.HOURLY,
-            name="Check Overdue Borrowings Every Minute"
+            name="Check Overdue Borrowings Every Minute",
         )
         if created:
             self.stdout.write(self.style.SUCCESS("✅ Schedule created successfully!"))

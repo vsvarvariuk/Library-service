@@ -5,11 +5,11 @@ from django_q.tasks import schedule, async_task
 from library.models import Borrowing
 from telegram.helper import send_telegram_message
 
+
 def check_overdue_borrowings():
     today = date.today()
     overdue = Borrowing.objects.filter(
-        expected_return_date__lt=today,
-        actual_return_date__isnull=True
+        expected_return_date__lt=today, actual_return_date__isnull=True
     )
 
     if not overdue.exists():
@@ -33,6 +33,5 @@ def send_borrowing_created_notification(borrowing):
         f"Book: {borrowing.book.title}\n"
         f"From: {borrowing.borrow_date}\n"
         f"To: {borrowing.expected_return_date}"
-
     )
     send_telegram_message(message)
