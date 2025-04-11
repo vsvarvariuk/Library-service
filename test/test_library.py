@@ -77,6 +77,21 @@ class AuthenticateUser(TestCase):
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(res_2.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_check_book_inventory_borrowing(self):
+        book = Book.objects.create(
+            title="Testtitle",
+            author="Testauthor",
+            cover="Hardcover",
+            inventory=5,
+            daily_free=1.5,
+        )
+
+        data = {"book": book.id, "expected_return_date": "2025-04-12"}
+        res = self.client.post(reverse("library:borrowing-list"), data)
+
+        book.refresh_from_db()
+        self.assertEqual(book.inventory, 4)
+
 
 class AdminUserTest(TestCase):
 
@@ -166,7 +181,7 @@ class AdminUserTest(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["user"], "Jack Morgan")
 
-    def test_filter_borrowings_by_is_active(self):
+    def test_filter_borrowings_by_is_active_and_inventory_book(self):
         book_2 = Book.objects.create(
             title="Potter",
             cover="Hardcover",
@@ -185,6 +200,7 @@ class AdminUserTest(TestCase):
         borrowing_2 = Borrowing.objects.create(
             expected_return_date=date(2025, 4, 16), book=book_2, user=user_2
         )
+
         data = {"actual_return_date": date.today()}
         self.client.patch(
             reverse("library:borrowing-return", args=[borrowing_1.id]), data
@@ -193,3 +209,11 @@ class AdminUserTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]["user"], "Jack Morgan")
+
+    def test_check_book_inventory_return(self):
+        borrowing = self.create_borrowing()
+        self.client.patch(reverse("library:borrowing-return", args=[borrowing.id]))
+
+        borrowing.refresh_from_db()
+        res = self.client.get(reverse("library:book-list"))
+        self.assertEqual(res.data[0]["inventory"], 6)
