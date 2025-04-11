@@ -92,6 +92,11 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not have permission to delete this item.")
         return super().destroy(request, *args, **kwargs)
 
+    def update(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied("You do not have permission to update this item.")
+        return super().update(request, *args, **kwargs)
+
 
 class BorrowingReturnView(generics.UpdateAPIView):
     serializer_class = BorrowingReturnSerializer
